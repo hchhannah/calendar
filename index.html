@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF_8">
+    <meta name="viewport" content="width=device_width, initial_scale=1.0">
+    <title>Calendar</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./reset.css">
+ 
+</head>
+<body>
+    <div class="bg-img"></div>
+
+    <div class="container">
+        <div class="calendar">
+            <div class="titleContainer deepGreen">
+                <div class="title month">
+                    <div class="arrow" id="prevMonth">＜</div>
+                    <div class="" id="month"></div>
+                    <div class="arrow" id="nextMonth">＞</div>
+                </div>
+                <div class="title">
+                    <div class="arrow" id="prevYear">＜</div>
+                    <div class="" id="year"></div>
+                    <div class="arrow" id="nextYear">＞</div>
+                </div>
+            </div>
+            <div class="body">
+            <div class="lightgrey week">
+                <ul>
+                    <li>SUN</li>
+                    <li>MON</li>
+                    <li>TUE</li>
+                    <li>WED</li>
+                    <li>THU</li>
+                    <li>FRI</li>
+                    <li>SAT</li>
+                </ul>
+            </div>
+            <div class="day body_list">
+                <ul id="days">
+                </ul>
+            </div>
+            </div>
+        </div>
+    </div>
+<script>
+        const month_normal = [31,28,31,30,31,30,31,31,30,31,30,31]; // 一般
+        const month_olympic = [31,29,31,30,31,30,31,31,30,31,30,31]; // 閏年
+        const month_name = ["01","02","03","04","05","06","07","08","09","10","11","12"]; //全部月份
+
+        const days = document.getElementById("days");
+        const prevMonth = document.getElementById("prevMonth");
+        const nextMonth = document.getElementById("nextMonth");
+        const prevYear = document.getElementById("prevYear");
+        const nextYear = document.getElementById("nextYear");
+        const month = document.getElementById("month");
+        const year = document.getElementById("year");
+        const my_date = new Date(); // 今天 (Sat Aug 05 2023 13:47:47 GMT+0800 (台北標準時間))
+        let my_year = my_date.getFullYear(); // 2023
+        let my_month = my_date.getMonth(); // 7
+        let my_day = my_date.getDate(); //5
+        console.log(my_month);
+        // 某年某月某一天是星期幾
+        const dayStart = (month, year) =>{
+            const tmpDate = new Date(year, month, 2);
+            return (tmpDate.getDay());
+        }
+
+        // 判斷是否為閏年並獲得總天數
+        const getDay = (month, year)=> {
+            const tmp = year % 4;
+            if (tmp == 0) {
+                return (month_olympic[month]);
+            } else {
+                return (month_normal[month]);
+            }
+        }
+
+        // 刷新日曆
+        const refreshDate = ()=>{
+            let str = "";
+            const totalDay = getDay(my_month, my_year); // 獲取該月總天數
+            const firstDay = dayStart(my_month, my_year); // 獲取該月第一天是星期幾
+
+            let myclass;
+            for(let i=1; i<firstDay; i++){ 
+                str += "<li></li>"; // 為起始日之前創造空白節點
+            }
+            for(let i=1; i<=totalDay; i++){
+                if((i<my_day && my_year==my_date.getFullYear() && my_month==my_date.getMonth()) || my_year<my_date.getFullYear() || ( my_year==my_date.getFullYear() && my_month<my_date.getMonth())){ 
+                    myclass = " class='lightgrey'"; // 以前的日期以灰色顯示
+                }
+                else if (i==my_day && my_year==my_date.getFullYear() && my_month==my_date.getMonth()){
+                    myclass = " class='deepGreen today'"; // 當天日期以選取顏色顯示
+                }
+                else{
+                    myclass = " class='day'"; // 未來日期以正常顯示
+                }
+                str += "<li"+myclass+">"+i+"</li>"; //创建日期节点
+            }
+            days.innerHTML = str; // 日曆顯示
+            month.innerHTML = month_name[my_month]; // 月份顯示
+            year.innerHTML = my_year; // 年份顯示
+            
+        }
+        refreshDate();
+        
+        prevMonth.onclick = function(e){
+            e.preventDefault();
+            // 從這個月開始不能往前選 (今年這個月以後)||(未來)
+            if( (my_year === my_date.getFullYear() && my_month-1 >= my_date.getMonth()) || (my_year > my_date.getFullYear())){
+                my_month--;
+                if(my_month<0){
+                    my_year--;
+                    my_month = 11;
+                }
+                refreshDate();
+            }
+        }
+        nextMonth.onclick = function(e){
+            e.preventDefault();
+            my_month++;
+            if(my_month>11){
+                my_year++;
+                my_month = 0;
+            }
+            refreshDate();
+        }
+
+        prevYear.onclick = function(e){
+            e.preventDefault();
+            // 只能選到今年
+            if((my_year-1 >= my_date.getFullYear())){
+                if(my_year-1 === my_date.getFullYear() && my_month < my_date.getMonth()){
+                    my_month = my_date.getMonth()
+                }
+                my_year--;
+                refreshDate();
+            }
+        }
+        nextYear.onclick = function(e){
+            e.preventDefault();
+            my_year++;
+            refreshDate();
+        }
+      </script>
+</body>
+</html>
